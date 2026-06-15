@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olympique Club Dakar — Bot Omnicanal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:        #12284C;
+  --navy-mid:    #1a3561;
+  --navy-pale:   #eef2f8;
+  --navy-border: rgba(18,40,76,.12);
+  --orange:      #D84D2B;
+  --orange-pale: #fdf1ee;
+  --orange-b:    rgba(216,77,43,.18);
+  --teal:        #33879E;
+  --teal-pale:   #eef7f9;
+  --teal-b:      rgba(51,135,158,.18);
+  --wa:          #25D366;
+  --wa-pale:     #f0fdf6;
+  --wa-b:        rgba(37,211,102,.18);
+  --fb:          #1877F2;
+  --fb-pale:     #eff6ff;
+  --fb-b:        rgba(24,119,242,.18);
+
+  --bg:       #f0f2f7;
+  --surface:  #ffffff;
+  --border:   #e2e6f0;
+  --text:     #0f1a2e;
+  --text-2:   #4a5878;
+  --text-3:   #8896b3;
+
+  --success:    #15803d;
+  --success-bg: #f0fdf4;
+  --success-b:  #bbf7d0;
+  --danger:     #b91c1c;
+  --danger-bg:  #fef2f2;
+  --danger-b:   #fecaca;
+  --warn:       #b45309;
+  --warn-bg:    #fffbeb;
+  --warn-b:     #fde68a;
+
+  --sidebar-w: 240px;
+  --topbar-h:  58px;
+  --r:         10px;
+  --r-sm:      6px;
+  --r-lg:      14px;
+  --shadow:    0 1px 4px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); display:flex; font-size:14px; }
+
+/* ── SIDEBAR ─────────────────────────────────── */
+.sidebar {
+  width:var(--sidebar-w); height:100vh;
+  background:var(--navy); display:flex; flex-direction:column;
+  flex-shrink:0; z-index:50;
+  box-shadow:4px 0 20px rgba(0,0,0,.15);
+}
+.sb-logo {
+  padding:14px; border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sb-logo-inner {
+  background:#fff; border-radius:var(--r);
+  padding:10px 14px; display:flex; align-items:center; gap:10px;
+}
+.sb-logo-icon {
+  width:34px; height:34px; flex-shrink:0;
+}
+.sb-logo-text .n { font-size:12px; font-weight:800; letter-spacing:.03em; color:var(--navy); line-height:1.1; }
+.sb-logo-text .s { font-size:9px; font-weight:500; color:#8896b3; text-transform:uppercase; letter-spacing:.08em; margin-top:1px; }
+
+.sb-status {
+  padding:8px 14px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex; align-items:center; gap:7px;
+  font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:#4ade80;
+}
+.dot { width:6px; height:6px; border-radius:50%; background:#4ade80; box-shadow:0 0 6px #4ade80; flex-shrink:0; }
+
+.sb-section { padding:12px 14px 4px; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.3); }
+.sb-nav { list-style:none; padding:0 10px; display:flex; flex-direction:column; gap:1px; }
+.sb-nav li a {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 10px; border-radius:var(--r-sm);
+  color:rgba(255,255,255,.6); font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .15s; position:relative; text-decoration:none;
+}
+.sb-nav li a:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.9); }
+.sb-nav li a.active { background:rgba(255,255,255,.12); color:#fff; font-weight:600; }
+.sb-nav li a.active::before {
+  content:''; position:absolute; left:-10px; top:50%; transform:translateY(-50%);
+  width:3px; height:16px; background:var(--orange); border-radius:0 3px 3px 0;
+}
+.ni { width:15px; text-align:center; font-size:14px; flex-shrink:0; }
+.nb { margin-left:auto; background:var(--orange); color:#fff; font-size:9px; font-weight:800; padding:1px 7px; border-radius:999px; }
+
+.sb-footer {
+  margin-top:auto; padding:12px 14px;
+  border-top:1px solid rgba(255,255,255,.07);
+  font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:rgba(255,255,255,.25); text-align:center;
+}
+
+/* ── MAIN ────────────────────────────────────── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ── TOPBAR ──────────────────────────────────── */
+.topbar {
+  height:var(--topbar-h); background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 24px; gap:14px;
+  flex-shrink:0; box-shadow:var(--shadow);
+}
+.tb-title { font-size:15px; font-weight:700; }
+.tb-sub   { font-size:11px; color:var(--text-3); margin-left:4px; }
+.tb-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.tb-pill {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 11px; border-radius:999px; font-size:11px; font-weight:600;
+  border:1px solid;
+}
+.pill-green  { background:var(--success-bg); color:var(--success); border-color:var(--success-b); }
+.pill-orange { background:var(--orange-pale); color:var(--orange); border-color:var(--orange-b); }
+.tb-av {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--navy); display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:#fff; cursor:pointer;
+  border:2px solid var(--orange);
+}
+
+/* ── CONTENT ─────────────────────────────────── */
+.content { flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:18px; }
+.content::-webkit-scrollbar { width:4px; }
+.content::-webkit-scrollbar-thumb { background:var(--border); border-radius:999px; }
+
+/* ── TABS (pages) ────────────────────────────── */
+.page { display:none; flex-direction:column; gap:18px; }
+.page.active { display:flex; }
+
+/* ── SECTION TITLE ───────────────────────────── */
+.sec-row { display:flex; align-items:center; justify-content:space-between; }
+.sec-title { font-size:13px; font-weight:700; }
+.sec-sub   { font-size:11px; color:var(--text-3); margin-top:1px; }
+.btn-sm {
+  padding:5px 12px; border-radius:var(--r-sm); font-size:11px; font-weight:600;
+  border:1px solid; cursor:pointer; transition:all .15s; font-family:'Inter',sans-serif;
+}
+.btn-navy    { background:var(--navy); color:#fff; border-color:var(--navy); }
+.btn-navy:hover { background:var(--navy-mid); }
+.btn-ghost   { background:var(--bg); color:var(--text-2); border-color:var(--border); }
+.btn-ghost:hover { background:var(--navy-pale); border-color:var(--navy-border); }
+
+/* ── KPI GRID ────────────────────────────────── */
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.kpi {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-lg); padding:18px 20px;
+  box-shadow:var(--shadow); transition:all .18s; cursor:default;
+  position:relative; overflow:hidden;
+}
+.kpi:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); }
+.kpi-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.kpi-ico {
+  width:36px; height:36px; border-radius:var(--r-sm);
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.ico-n { background:var(--navy-pale); }
+.ico-o { background:var(--orange-pale); }
+.ico-t { background:var(--teal-pale); }
+.ico-g { background:var(--success-bg); }
+.ico-w { background:var(--wa-pale); }
+.ico-f { background:var(--fb-pale); }
+.kpi-badge {
+  font-size:10px; font-weight:600; padding:2px 8px; border-radius:999px;
+  display:inline-flex; align-items:center; gap:3px;
+}
+.up   { color:var(--success); background:var(--success-bg); }
+.down { color:var(--danger);  background:var(--danger-bg); }
+.flat { color:var(--warn);    background:var(--warn-bg); }
+.kpi-val  { font-size:28px; font-weight:800; letter-spacing:-.03em; color:var(--text); }
+.kpi-lbl  { font-size:11px; color:var(--text-3); margin-top:2px; }
+.kpi-bar  { height:3px; background:var(--bg); border-radius:999px; margin-top:12px; overflow:hidden; }
+.kpi-fill { height:100%; border-radius:999px; }
+.f-n { background:var(--navy); }
+.f-o { background:var(--orange); }
+.f-t { background:var(--teal); }
+.f-g { background:#16a34a; }
+.f-w { background:var(--wa); }
+.f-f { background:var(--fb); }
+
+/* ── CARD ────────────────────────────────────── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-lg); box-shadow:var(--shadow);
+}
+.card-hdr {
+  padding:14px 18px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.card-title { font-size:13px; font-weight:700; }
+.card-sub   { font-size:11px; color:var(--text-3); margin-top:1px; }
+
+/* ── TWO COL ─────────────────────────────────── */
+.g2   { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.g3   { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.g2-1 { display:grid; grid-template-columns:1fr 300px; gap:14px; }
+
+/* ── CHANNEL CARDS ───────────────────────────── */
+.ch-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.ch {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-lg); padding:18px; box-shadow:var(--shadow);
+}
+.ch-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.ch-info { display:flex; align-items:center; gap:10px; }
+.ch-ico {
+  width:40px; height:40px; border-radius:var(--r-sm);
+  display:flex; align-items:center; justify-content:center; font-size:19px;
+}
+.ic-wa { background:var(--wa-pale); border:1px solid var(--wa-b); }
+.ic-fb { background:var(--fb-pale); border:1px solid var(--fb-b); }
+.ch-name { font-size:13px; font-weight:700; }
+.ch-desc { font-size:10px; color:var(--text-3); margin-top:2px; }
+.status-on {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; border-radius:999px; font-size:10px; font-weight:600;
+  background:var(--success-bg); color:var(--success); border:1px solid var(--success-b);
+}
+.ch-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.chs {
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:var(--r-sm); padding:10px 8px; text-align:center;
+}
+.chs-v { font-size:18px; font-weight:800; letter-spacing:-.02em; }
+.chs-l { font-size:10px; color:var(--text-3); margin-top:1px; }
+.pbar { height:3px; background:var(--bg); border-radius:999px; overflow:hidden; margin-top:10px; }
+.pbar-f { height:100%; border-radius:999px; }
+
+/* ── ACTIVITY ────────────────────────────────── */
+.feed { padding:0; max-height:320px; overflow-y:auto; }
+.feed::-webkit-scrollbar { width:3px; }
+.feed::-webkit-scrollbar-thumb { background:var(--border); }
+.fi {
+  padding:11px 18px; border-bottom:1px solid var(--border);
+  display:flex; gap:11px; align-items:flex-start; cursor:pointer; transition:background .12s;
+}
+.fi:last-child { border-bottom:none; }
+.fi:hover { background:var(--bg); }
+.fi-ico {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;
+}
+.fi-wa  { background:var(--wa-pale); }
+.fi-fb  { background:var(--fb-pale); }
+.fi-ok  { background:var(--success-bg); }
+.fi-sys { background:var(--navy-pale); }
+.fi-body { flex:1; }
+.fi-text { font-size:12px; line-height:1.45; color:var(--text-2); }
+.fi-text strong { color:var(--text); font-weight:600; }
+.fi-time { font-size:10px; color:var(--text-3); margin-top:2px; }
+.fi-right { font-size:10px; color:var(--text-3); flex-shrink:0; padding-top:1px; }
+
+/* ── SPORT TABLE ─────────────────────────────── */
+.tbl { width:100%; border-collapse:collapse; }
+.tbl thead th {
+  padding:9px 14px; text-align:left;
+  font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--text-3); background:var(--bg); border-bottom:1px solid var(--border);
+}
+.tbl tbody tr { border-bottom:1px solid var(--border); cursor:pointer; transition:background .1s; }
+.tbl tbody tr:hover { background:var(--navy-pale); }
+.tbl tbody tr:last-child { border-bottom:none; }
+.tbl tbody td { padding:11px 14px; font-size:12px; vertical-align:middle; }
+.td-sport { font-weight:600; display:flex; align-items:center; gap:8px; }
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 9px; border-radius:999px; font-size:10px; font-weight:600;
+}
+.b-green  { background:var(--success-bg); color:var(--success); border:1px solid var(--success-b); }
+.b-orange { background:var(--orange-pale); color:var(--orange); border:1px solid var(--orange-b); }
+.b-navy   { background:var(--navy-pale); color:var(--navy); border:1px solid var(--navy-border); }
+.b-teal   { background:var(--teal-pale); color:var(--teal); border:1px solid var(--teal-b); }
+.b-gray   { background:var(--bg); color:var(--text-3); border:1px solid var(--border); }
+
+/* ── CANAL BARS ──────────────────────────────── */
+.cbar-row  { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.cbar-row:last-child { margin-bottom:0; }
+.cbar-ico  { font-size:14px; width:20px; flex-shrink:0; }
+.cbar-lbl  { width:80px; font-size:12px; color:var(--text-2); flex-shrink:0; }
+.cbar-track { flex:1; height:7px; background:var(--bg); border-radius:999px; overflow:hidden; }
+.cbar-fill  { height:100%; border-radius:999px; transition:width .7s cubic-bezier(.16,1,.3,1); }
+.cbar-pct   { width:32px; font-size:11px; font-weight:700; color:var(--text-2); text-align:right; }
+
+/* ── CONVERSATIONS INBOX ─────────────────────── */
+.conv-wrap {
+  display:grid; grid-template-columns:300px 1fr;
+  height:calc(100vh - var(--topbar-h) - 140px);
+  overflow:hidden; border-radius:var(--r-lg);
+  border:1px solid var(--border); box-shadow:var(--shadow);
+  background:var(--surface);
+}
+.conv-list { border-right:1px solid var(--border); overflow-y:auto; display:flex; flex-direction:column; }
+.conv-list::-webkit-scrollbar { width:3px; }
+.conv-list::-webkit-scrollbar-thumb { background:var(--border); }
+.conv-list-hdr {
+  padding:12px 14px; border-bottom:1px solid var(--border);
+  font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--text-3); flex-shrink:0;
+}
+.conv-item {
+  padding:12px 14px; border-bottom:1px solid var(--border);
+  cursor:pointer; transition:background .12s; position:relative;
+}
+.conv-item:hover { background:var(--navy-pale); }
+.conv-item.active { background:var(--navy-pale); border-left:3px solid var(--orange); }
+.ci-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.ci-name { font-size:12px; font-weight:600; }
+.ci-time { font-size:10px; color:var(--text-3); }
+.ci-snippet { font-size:11px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+.ci-badges { display:flex; gap:4px; margin-top:5px; }
+
+.conv-thread { display:flex; flex-direction:column; overflow:hidden; }
+.ct-hdr {
+  padding:12px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px; flex-shrink:0;
+  background:var(--surface);
+}
+.ct-av {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--navy); color:#fff; font-size:11px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ct-name  { font-size:13px; font-weight:700; }
+.ct-meta  { font-size:10px; color:var(--text-3); margin-top:1px; }
+.ct-right { margin-left:auto; display:flex; gap:6px; align-items:center; }
+
+.ct-msgs {
+  flex:1; overflow-y:auto; padding:16px;
+  display:flex; flex-direction:column; gap:10px;
+  background:#f8f9fc;
+}
+.ct-msgs::-webkit-scrollbar { width:3px; }
+.ct-msgs::-webkit-scrollbar-thumb { background:var(--border); }
+
+.msg { display:flex; flex-direction:column; max-width:72%; }
+.msg-u { align-self:flex-end; }
+.msg-b { align-self:flex-start; }
+.msg-sys { align-self:center; max-width:90%; }
+
+.msg-bubble {
+  padding:9px 13px; font-size:12px; line-height:1.55;
+  word-break:break-word;
+}
+.msg-u .msg-bubble {
+  background:var(--navy); color:#fff;
+  border-radius:14px 14px 2px 14px;
+}
+.msg-b .msg-bubble {
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border);
+  border-radius:14px 14px 14px 2px;
+  box-shadow:var(--shadow);
+}
+.msg-sys .msg-bubble {
+  background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn-b);
+  border-radius:var(--r-sm); font-size:11px; font-weight:500; text-align:center;
+}
+.msg-bot-name {
+  font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--teal); margin-bottom:3px; padding-left:2px;
+}
+.msg-time { font-size:10px; color:var(--text-3); margin-top:3px; padding:0 2px; }
+.msg-u .msg-time { text-align:right; }
+
+.ct-empty {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  color:var(--text-3); gap:8px;
+}
+.ct-empty-ico { font-size:32px; opacity:.4; }
+.ct-empty-txt { font-size:13px; }
+
+/* ── TOAST ───────────────────────────────────── */
+.toast-wrap { position:fixed; bottom:18px; right:18px; z-index:999; display:flex; flex-direction:column; gap:6px; }
+.toast {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:10px 14px; display:flex; align-items:flex-start; gap:9px;
+  min-width:250px; box-shadow:var(--shadow-md);
+  animation:fadeUp .35s cubic-bezier(.16,1,.3,1) both;
+  border-left:3px solid var(--orange);
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.t-body { flex:1; }
+.t-title { font-size:12px; font-weight:600; }
+.t-sub   { font-size:11px; color:var(--text-3); margin-top:2px; }
+.t-close { background:none; border:none; color:var(--text-3); font-size:12px; cursor:pointer; padding:2px; }
+.t-close:hover { color:var(--text); }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-inner">
+      <svg class="sb-logo-icon" width="34" height="34" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="17" r="16" fill="#f0f2f7"/>
+        <circle cx="17" cy="17" r="6.5" fill="none" stroke="#12284C" stroke-width="1.8"/>
+        <circle cx="17" cy="17" r="3.5" fill="#12284C"/>
+        <line x1="17" y1="7.5" x2="17" y2="5.5" stroke="#D84D2B" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="17" y1="28.5" x2="17" y2="26.5" stroke="#D84D2B" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="26.5" y1="17" x2="28.5" y2="17" stroke="#D84D2B" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="5.5" y1="17" x2="7.5" y2="17" stroke="#D84D2B" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="23.7" y1="10.3" x2="25.1" y2="8.9" stroke="#D84D2B" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="8.9" y1="25.1" x2="10.3" y2="23.7" stroke="#D84D2B" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="23.7" y1="23.7" x2="25.1" y2="25.1" stroke="#D84D2B" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="8.9" y1="8.9" x2="10.3" y2="10.3" stroke="#D84D2B" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <div class="sb-logo-text">
+        <div class="n">OLYMPIQUE CLUB</div>
+        <div class="s">Dakar · Bot Omnicanal</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-status">
+    <span class="dot"></span>
+    Bot actif · 2 canaux
+  </div>
+
+  <div class="sb-section">Vue d'ensemble</div>
+  <ul class="sb-nav">
+    <li><a class="active" onclick="nav(this,'overview')"><span class="ni">📊</span> Vue générale</a></li>
+    <li><a onclick="nav(this,'conversations')"><span class="ni">💬</span> Conversations <span class="nb">24</span></a></li>
+  </ul>
+
+  <div class="sb-section">Canaux</div>
+  <ul class="sb-nav">
+    <li><a onclick="nav(this,'whatsapp')"><span class="ni">📱</span> WhatsApp <span class="nb">18</span></a></li>
+    <li><a onclick="nav(this,'facebook')"><span class="ni">🔵</span> Facebook <span class="nb" style="background:var(--teal)">6</span></a></li>
+  </ul>
+
+  <div class="sb-section">Activités</div>
+  <ul class="sb-nav">
+    <li><a onclick="nav(this,'tennis')"><span class="ni">🎾</span> Tennis & Padel</a></li>
+    <li><a onclick="nav(this,'piscine')"><span class="ni">🏊</span> Piscine</a></li>
+    <li><a onclick="nav(this,'fitness')"><span class="ni">💪</span> Fitness</a></li>
+    <li><a onclick="nav(this,'basket')"><span class="ni">🏀</span> Basketball</a></li>
+    <li><a onclick="nav(this,'artsmartiaux')"><span class="ni">🥋</span> Arts martiaux</a></li>
+  </ul>
+
+  <div class="sb-section">Paramètres</div>
+  <ul class="sb-nav">
+    <li><a onclick="nav(this,'config')"><span class="ni">⚙️</span> Configuration</a></li>
+  </ul>
+
+  <div class="sb-footer">Propulsé par NOX · Dakar</div>
+</aside>
+
+<!-- ── MAIN ─────────────────────────────────────── -->
+<div class="main">
+  <header class="topbar">
+    <span class="tb-title">Vue générale</span>
+    <span class="tb-sub">— Bot omnicanal Olympique Club Dakar</span>
+    <div class="tb-right">
+      <span class="tb-pill pill-green"><span class="dot" style="width:5px;height:5px;box-shadow:none"></span>Bot en ligne</span>
+      <span class="tb-pill pill-orange">Juin 2026</span>
+      <div class="tb-av">OC</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- PAGE: Overview -->
+    <div class="page active" id="p-overview">
+
+      <!-- KPI -->
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-top">
+            <div class="kpi-ico ico-n">💬</div>
+            <span class="kpi-badge up">+34% ↑</span>
+          </div>
+          <div class="kpi-val" id="kv1">—</div>
+          <div class="kpi-lbl">Messages traités ce mois</div>
+          <div class="kpi-bar"><div class="kpi-fill f-n" style="width:78%"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <div class="kpi-ico ico-o">🎾</div>
+            <span class="kpi-badge up">+21% ↑</span>
+          </div>
+          <div class="kpi-val" id="kv2">—</div>
+          <div class="kpi-lbl">Réservations terrain (juin)</div>
+          <div class="kpi-bar"><div class="kpi-fill f-o" style="width:62%"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <div class="kpi-ico ico-t">⚡</div>
+            <span class="kpi-badge up">−18% ↓</span>
+          </div>
+          <div class="kpi-val" id="kv3">—</div>
+          <div class="kpi-lbl">Temps de réponse moyen</div>
+          <div class="kpi-bar"><div class="kpi-fill f-t" style="width:20%"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <div class="kpi-ico ico-g">😊</div>
+            <span class="kpi-badge up">+4% ↑</span>
+          </div>
+          <div class="kpi-val" id="kv4">—</div>
+          <div class="kpi-lbl">Satisfaction membres</div>
+          <div class="kpi-bar"><div class="kpi-fill f-g" style="width:94%"></div></div>
+        </div>
+      </div>
+
+      <!-- Channels -->
+      <div>
+        <div class="sec-row" style="margin-bottom:10px">
+          <div><div class="sec-title">Canaux de communication</div><div class="sec-sub">WhatsApp + Facebook Messenger — réponse automatique 24h/24</div></div>
+          <button class="btn-sm btn-navy" onclick="simMsg()">▶ Simuler un message</button>
+        </div>
+        <div class="ch-row">
+          <div class="ch">
+            <div class="ch-top">
+              <div class="ch-info">
+                <div class="ch-ico ic-wa">📱</div>
+                <div><div class="ch-name">WhatsApp Business</div><div class="ch-desc">+221 78 189 61 26</div></div>
+              </div>
+              <span class="status-on"><span class="dot" style="width:5px;height:5px;background:#15803d;box-shadow:none;flex-shrink:0"></span>Actif</span>
+            </div>
+            <div class="ch-stats">
+              <div class="chs"><div class="chs-v" style="color:var(--wa)">847</div><div class="chs-l">Messages reçus</div></div>
+              <div class="chs"><div class="chs-v" style="color:var(--wa)">98%</div><div class="chs-l">Taux réponse</div></div>
+              <div class="chs"><div class="chs-v" style="color:var(--wa)">&lt;3s</div><div class="chs-l">Délai moyen</div></div>
+            </div>
+            <div class="pbar"><div class="pbar-f" style="width:78%;background:var(--wa)"></div></div>
+            <div style="font-size:10px;color:var(--text-3);margin-top:4px">78% des interactions</div>
+          </div>
+          <div class="ch">
+            <div class="ch-top">
+              <div class="ch-info">
+                <div class="ch-ico ic-fb">🔵</div>
+                <div><div class="ch-name">Facebook Messenger</div><div class="ch-desc">Page @OlympiqueClub</div></div>
+              </div>
+              <span class="status-on"><span class="dot" style="width:5px;height:5px;background:#15803d;box-shadow:none;flex-shrink:0"></span>Actif</span>
+            </div>
+            <div class="ch-stats">
+              <div class="chs"><div class="chs-v" style="color:var(--fb)">239</div><div class="chs-l">Messages reçus</div></div>
+              <div class="chs"><div class="chs-v" style="color:var(--fb)">96%</div><div class="chs-l">Taux réponse</div></div>
+              <div class="chs"><div class="chs-v" style="color:var(--fb)">&lt;5s</div><div class="chs-l">Délai moyen</div></div>
+            </div>
+            <div class="pbar"><div class="pbar-f" style="width:22%;background:var(--fb)"></div></div>
+            <div style="font-size:10px;color:var(--text-3);margin-top:4px">22% des interactions</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity + Canaux breakdown -->
+      <div class="g2-1">
+        <!-- Feed -->
+        <div class="card">
+          <div class="card-hdr">
+            <div><div class="card-title">Activité récente</div><div class="card-sub">Dernières interactions</div></div>
+            <span class="status-on" style="font-size:9px"><span class="dot" style="width:5px;height:5px;background:#15803d;box-shadow:none;flex-shrink:0"></span>Live</span>
+          </div>
+          <div class="feed" id="feed">
+            <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Tennis Court 4 réservé</strong> — Cheikh Ndiaye · 16 juin 18h</div><div class="fi-time">WhatsApp · il y a 4 min</div></div><div class="fi-right">09:48</div></div>
+            <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>Tarifs piscine demandés</strong> — Aïssatou Fall · abonnement 6 mois</div><div class="fi-time">Facebook · il y a 17 min</div></div><div class="fi-right">09:35</div></div>
+            <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Padel Court P2 réservé</strong> — Omar Sy · demain 20h</div><div class="fi-time">WhatsApp · il y a 31 min</div></div><div class="fi-right">09:21</div></div>
+            <div class="fi"><div class="fi-ico fi-ok">✅</div><div class="fi-body"><div class="fi-text"><strong>Cours fitness confirmé</strong> — Mariama Baldé · lundi 18h</div><div class="fi-time">WhatsApp · il y a 42 min</div></div><div class="fi-right">09:10</div></div>
+            <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>Horaires basket demandés</strong> — Ibrahima Diallo</div><div class="fi-time">Facebook · il y a 57 min</div></div><div class="fi-right">08:55</div></div>
+            <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Cours natation enfant</strong> — Rokhaya Gaye · inscriptions ouvertes</div><div class="fi-time">WhatsApp · il y a 1h10</div></div><div class="fi-right">08:42</div></div>
+            <div class="fi"><div class="fi-ico fi-sys">🤖</div><div class="fi-body"><div class="fi-text"><strong>Escalade vers agent</strong> — Demande complexe : inscription compétition tennis</div><div class="fi-time">Système · il y a 1h22</div></div><div class="fi-right">08:30</div></div>
+          </div>
+        </div>
+
+        <!-- Right col: canal breakdown + sport breakdown -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Répartition par canal</div>
+            </div>
+            <div style="padding:16px 18px">
+              <div class="cbar-row">
+                <span class="cbar-ico">📱</span>
+                <span class="cbar-lbl">WhatsApp</span>
+                <div class="cbar-track"><div class="cbar-fill" style="width:78%;background:var(--wa)"></div></div>
+                <span class="cbar-pct">78%</span>
+              </div>
+              <div class="cbar-row">
+                <span class="cbar-ico">🔵</span>
+                <span class="cbar-lbl">Facebook</span>
+                <div class="cbar-track"><div class="cbar-fill" style="width:22%;background:var(--fb)"></div></div>
+                <span class="cbar-pct">22%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Top demandes</div>
+            </div>
+            <div style="padding:14px 18px;display:flex;flex-direction:column;gap:9px">
+              <div class="cbar-row" style="margin:0">
+                <span class="cbar-ico">🎾</span>
+                <span class="cbar-lbl">Réservation</span>
+                <div class="cbar-track"><div class="cbar-fill" style="width:38%;background:var(--orange)"></div></div>
+                <span class="cbar-pct">38%</span>
+              </div>
+              <div class="cbar-row" style="margin:0">
+                <span class="cbar-ico">🏊</span>
+                <span class="cbar-lbl">Piscine</span>
+                <div class="cbar-track"><div class="cbar-fill" style="width:24%;background:var(--navy)"></div></div>
+                <span class="cbar-pct">24%</span>
+              </div>
+              <div class="cbar-row" style="margin:0">
+                <span class="cbar-ico">💪</span>
+                <span class="cbar-lbl">Fitness</span>
+                <div class="cbar-track"><div class="cbar-fill" style="width:18%;background:var(--teal)"></div></div>
+                <span class="cbar-pct">18%</span>
+              </div>
+              <div class="cbar-row" style="margin:0">
+                <span class="cbar-ico">🥋</span>
+                <span class="cbar-lbl">Arts martiaux</span>
+                <div class="cbar-track"><div class="cbar-fill" style="width:12%;background:var(--text-3)"></div></div>
+                <span class="cbar-pct">12%</span>
+              </div>
+              <div class="cbar-row" style="margin:0">
+                <span class="cbar-ico">🏀</span>
+                <span class="cbar-lbl">Basket</span>
+                <div class="cbar-track"><div class="cbar-fill" style="width:8%;background:var(--text-3)"></div></div>
+                <span class="cbar-pct">8%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All sports table -->
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Activités — Interactions ce mois</div>
+            <div class="card-sub">Toutes les sections du club · WhatsApp + Facebook</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Activité</th>
+                <th>Messages</th>
+                <th>Via WhatsApp</th>
+                <th>Via Facebook</th>
+                <th>Réservations</th>
+                <th>Taux réponse</th>
+                <th>Statut bot</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="td-sport">🎾 Tennis & Padel</div></td>
+                <td><strong>412</strong></td>
+                <td>328 <span style="font-size:10px;color:var(--text-3)">(80%)</span></td>
+                <td>84 <span style="font-size:10px;color:var(--text-3)">(20%)</span></td>
+                <td><strong style="color:var(--navy)">143</strong></td>
+                <td><span class="badge b-green">98%</span></td>
+                <td><span class="badge b-green">● Actif</span></td>
+              </tr>
+              <tr>
+                <td><div class="td-sport">🏊 Piscine</div></td>
+                <td><strong>268</strong></td>
+                <td>198 <span style="font-size:10px;color:var(--text-3)">(74%)</span></td>
+                <td>70 <span style="font-size:10px;color:var(--text-3)">(26%)</span></td>
+                <td><strong style="color:var(--navy)">—</strong></td>
+                <td><span class="badge b-green">97%</span></td>
+                <td><span class="badge b-green">● Actif</span></td>
+              </tr>
+              <tr>
+                <td><div class="td-sport">💪 Fitness / Musculation</div></td>
+                <td><strong>201</strong></td>
+                <td>165 <span style="font-size:10px;color:var(--text-3)">(82%)</span></td>
+                <td>36 <span style="font-size:10px;color:var(--text-3)">(18%)</span></td>
+                <td><strong style="color:var(--navy)">—</strong></td>
+                <td><span class="badge b-green">99%</span></td>
+                <td><span class="badge b-green">● Actif</span></td>
+              </tr>
+              <tr>
+                <td><div class="td-sport">🏀 Basketball</div></td>
+                <td><strong>89</strong></td>
+                <td>62 <span style="font-size:10px;color:var(--text-3)">(70%)</span></td>
+                <td>27 <span style="font-size:10px;color:var(--text-3)">(30%)</span></td>
+                <td><strong style="color:var(--navy)">—</strong></td>
+                <td><span class="badge b-orange">94%</span></td>
+                <td><span class="badge b-green">● Actif</span></td>
+              </tr>
+              <tr>
+                <td><div class="td-sport">🥋 Arts martiaux</div></td>
+                <td><strong>134</strong></td>
+                <td>94 <span style="font-size:10px;color:var(--text-3)">(70%)</span></td>
+                <td>40 <span style="font-size:10px;color:var(--text-3)">(30%)</span></td>
+                <td><strong style="color:var(--navy)">—</strong></td>
+                <td><span class="badge b-green">96%</span></td>
+                <td><span class="badge b-green">● Actif</span></td>
+              </tr>
+              <tr>
+                <td><div class="td-sport">🧗 Escalade</div></td>
+                <td><strong>47</strong></td>
+                <td>38 <span style="font-size:10px;color:var(--text-3)">(81%)</span></td>
+                <td>9 <span style="font-size:10px;color:var(--text-3)">(19%)</span></td>
+                <td><strong style="color:var(--navy)">—</strong></td>
+                <td><span class="badge b-green">100%</span></td>
+                <td><span class="badge b-green">● Actif</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page overview -->
+
+    <!-- PAGE: Conversations -->
+    <div class="page" id="p-conversations">
+      <!-- KPI row -->
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-n">💬</div><span class="kpi-badge flat">Ce mois</span></div><div class="kpi-val">1 086</div><div class="kpi-lbl">Total conversations</div><div class="kpi-bar"><div class="kpi-fill f-n" style="width:78%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">✅</div><span class="kpi-badge up">98% ↑</span></div><div class="kpi-val">1 064</div><div class="kpi-lbl">Résolues automatiquement</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:98%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">🤝</div><span class="kpi-badge flat">2%</span></div><div class="kpi-val">22</div><div class="kpi-lbl">Escalades agent humain</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:2%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">⏱</div><span class="kpi-badge up">−18% ↓</span></div><div class="kpi-val">2s</div><div class="kpi-lbl">Temps de réponse moyen</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:20%"></div></div></div>
+      </div>
+
+      <!-- Inbox -->
+      <div class="conv-wrap">
+        <!-- Liste conversations -->
+        <div class="conv-list">
+          <div class="conv-list-hdr">Conversations récentes</div>
+
+          <div class="conv-item active" onclick="openConv(this,0)">
+            <div class="ci-top"><span class="ci-name">Moussa Diaw</span><span class="ci-time">09:48</span></div>
+            <div class="ci-snippet">Je voudrais réserver un terrain demain soir…</div>
+            <div class="ci-badges"><span class="badge b-green" style="font-size:9px">📱 WhatsApp</span><span class="badge b-teal" style="font-size:9px">🎾 Tennis</span><span class="badge b-green" style="font-size:9px">Résolu</span></div>
+          </div>
+
+          <div class="conv-item" onclick="openConv(this,1)">
+            <div class="ci-top"><span class="ci-name">Aïssatou Fall</span><span class="ci-time">09:35</span></div>
+            <div class="ci-snippet">Quel est le tarif pour la piscine 6 mois ?</div>
+            <div class="ci-badges"><span class="badge b-navy" style="font-size:9px">🔵 Facebook</span><span class="badge b-teal" style="font-size:9px">🏊 Piscine</span><span class="badge b-green" style="font-size:9px">Résolu</span></div>
+          </div>
+
+          <div class="conv-item" onclick="openConv(this,2)">
+            <div class="ci-top"><span class="ci-name">James Okonkwo</span><span class="ci-time">09:21</span></div>
+            <div class="ci-snippet">I'd like to book a padel court for tomorrow</div>
+            <div class="ci-badges"><span class="badge b-navy" style="font-size:9px">🔵 Facebook</span><span class="badge b-teal" style="font-size:9px">🏓 Padel</span><span class="badge b-green" style="font-size:9px">Résolu</span></div>
+          </div>
+
+          <div class="conv-item" onclick="openConv(this,3)">
+            <div class="ci-top"><span class="ci-name">Mariama Baldé</span><span class="ci-time">09:10</span></div>
+            <div class="ci-snippet">C'est quoi les horaires de l'aqua gym ?</div>
+            <div class="ci-badges"><span class="badge b-green" style="font-size:9px">📱 WhatsApp</span><span class="badge b-teal" style="font-size:9px">🏊 Piscine</span><span class="badge b-green" style="font-size:9px">Résolu</span></div>
+          </div>
+
+          <div class="conv-item" onclick="openConv(this,4)">
+            <div class="ci-top"><span class="ci-name">Pape Seck</span><span class="ci-time">08:42</span></div>
+            <div class="ci-snippet">C'est quand les cours de judo pour enfants ?</div>
+            <div class="ci-badges"><span class="badge b-green" style="font-size:9px">📱 WhatsApp</span><span class="badge b-teal" style="font-size:9px">🥋 Arts martiaux</span><span class="badge b-green" style="font-size:9px">Résolu</span></div>
+          </div>
+
+          <div class="conv-item" onclick="openConv(this,5)">
+            <div class="ci-top"><span class="ci-name">Amadou Mbaye</span><span class="ci-time">08:30</span></div>
+            <div class="ci-snippet">Je veux m'inscrire à un tournoi de tennis…</div>
+            <div class="ci-badges"><span class="badge b-green" style="font-size:9px">📱 WhatsApp</span><span class="badge b-teal" style="font-size:9px">🎾 Tennis</span><span class="badge b-orange" style="font-size:9px">🤝 Agent</span></div>
+          </div>
+
+          <div class="conv-item" onclick="openConv(this,6)">
+            <div class="ci-top"><span class="ci-name">Khadija Ba</span><span class="ci-time">08:15</span></div>
+            <div class="ci-snippet">Tarifs aqua bike + planning svp</div>
+            <div class="ci-badges"><span class="badge b-green" style="font-size:9px">📱 WhatsApp</span><span class="badge b-teal" style="font-size:9px">🏊 Piscine</span><span class="badge b-green" style="font-size:9px">Résolu</span></div>
+          </div>
+
+          <div class="conv-item" onclick="openConv(this,7)">
+            <div class="ci-top"><span class="ci-name">Ibrahima Diallo</span><span class="ci-time">07:55</span></div>
+            <div class="ci-snippet">Planning des entraînements basket adultes ?</div>
+            <div class="ci-badges"><span class="badge b-navy" style="font-size:9px">🔵 Facebook</span><span class="badge b-teal" style="font-size:9px">🏀 Basket</span><span class="badge b-green" style="font-size:9px">Résolu</span></div>
+          </div>
+        </div>
+
+        <!-- Thread -->
+        <div class="conv-thread" id="conv-thread">
+          <div class="ct-hdr" id="ct-hdr">
+            <div class="ct-av" id="ct-av">MD</div>
+            <div><div class="ct-name" id="ct-name">Moussa Diaw</div><div class="ct-meta" id="ct-meta">WhatsApp · 🎾 Tennis · 16 juin 2026</div></div>
+            <div class="ct-right">
+              <span class="badge b-green" id="ct-status">Résolu</span>
+            </div>
+          </div>
+          <div class="ct-msgs" id="ct-msgs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: WhatsApp -->
+    <div class="page" id="p-whatsapp">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-w">📱</div><span class="kpi-badge up">+34% ↑</span></div><div class="kpi-val">847</div><div class="kpi-lbl">Messages reçus (juin)</div><div class="kpi-bar"><div class="kpi-fill f-w" style="width:78%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">✅</div><span class="kpi-badge up">98% ↑</span></div><div class="kpi-val">98%</div><div class="kpi-lbl">Taux de réponse</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:98%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">⚡</div><span class="kpi-badge up">−18% ↓</span></div><div class="kpi-val">&lt; 3s</div><div class="kpi-lbl">Temps de réponse moyen</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:15%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">🎾</div><span class="kpi-badge up">+21% ↑</span></div><div class="kpi-val">112</div><div class="kpi-lbl">Réservations via WhatsApp</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:55%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Activité WhatsApp · Juin 2026</div></div>
+        <div class="feed">
+          <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Moussa Diaw</strong> — "Bonjour, je voudrais réserver un terrain de tennis demain" → Court 4 · 18h · Confirmé</div><div class="fi-time">09:48 · 🎾 Tennis</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+          <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Khadija Ba</strong> — "Tarifs aqua bike ?" → Planning + tarifs envoyés automatiquement</div><div class="fi-time">09:10 · 🏊 Piscine</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+          <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Pape Seck</strong> — "C'est quand les cours de judo pour enfants ?" → Horaires + tarifs envoyés</div><div class="fi-time">08:42 · 🥋 Arts martiaux</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+          <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Rokhaya Gaye</strong> — Cours natation enfant, inscription septembre</div><div class="fi-time">08:30 · 🏊 Piscine</div></div><div class="fi-right"><span class="badge b-navy">En attente</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: Facebook -->
+    <div class="page" id="p-facebook">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-f">🔵</div><span class="kpi-badge up">+18% ↑</span></div><div class="kpi-val">239</div><div class="kpi-lbl">Messages reçus (juin)</div><div class="kpi-bar"><div class="kpi-fill f-f" style="width:22%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">✅</div><span class="kpi-badge up">96% ↑</span></div><div class="kpi-val">96%</div><div class="kpi-lbl">Taux de réponse</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:96%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">⚡</div><span class="kpi-badge up">−12% ↓</span></div><div class="kpi-val">&lt; 5s</div><div class="kpi-lbl">Temps de réponse moyen</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:20%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">🎾</div><span class="kpi-badge up">+14% ↑</span></div><div class="kpi-val">31</div><div class="kpi-lbl">Réservations via Facebook</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:22%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Activité Facebook Messenger · Juin 2026</div></div>
+        <div class="feed">
+          <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>Aïssatou Fall</strong> — "Quel est le tarif pour l'abonnement piscine 6 mois ?" → Réponse automatique : 135 000F membre / 180 000F non-membre</div><div class="fi-time">09:35 · 🏊 Piscine</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+          <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>James Okonkwo</strong> — "I'd like to book a padel court tomorrow evening" → Court P2 · 20h · Confirmed</div><div class="fi-time">09:21 · 🏓 Padel · EN</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+          <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>Ibrahima Diallo</strong> — Planning basketball adultes + contacts coach</div><div class="fi-time">08:55 · 🏀 Basket</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: Tennis & Padel -->
+    <div class="page" id="p-tennis">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">🎾</div><span class="kpi-badge up">+21% ↑</span></div><div class="kpi-val">143</div><div class="kpi-lbl">Réservations terrain (juin)</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:62%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-n">💬</div><span class="kpi-badge up">+28% ↑</span></div><div class="kpi-val">412</div><div class="kpi-lbl">Messages liés tennis/padel</div><div class="kpi-bar"><div class="kpi-fill f-n" style="width:70%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">🏟</div><span class="kpi-badge flat">8 courts</span></div><div class="kpi-val">6/8</div><div class="kpi-lbl">Courts actifs maintenant</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:75%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">🏓</div><span class="kpi-badge flat">4 courts</span></div><div class="kpi-val">3/4</div><div class="kpi-lbl">Courts padel actifs</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:75%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">
+          <div><div class="card-title">Réservations Tennis & Padel · Juin 2026</div><div class="card-sub">Via WhatsApp et Facebook · Balle Jaune</div></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Membre</th><th>Sport</th><th>Court</th><th>Date / Heure</th><th>Canal</th><th>Statut</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Moussa Diaw</strong></td><td>🎾 Tennis</td><td>Court 4</td><td>16 juin · 18h–19h</td><td><span class="badge b-green">WhatsApp</span></td><td><span class="badge b-green">Confirmé</span></td></tr>
+              <tr><td><strong>Omar Sy</strong></td><td>🏓 Padel</td><td>Court P2</td><td>16 juin · 20h–21h</td><td><span class="badge b-green">WhatsApp</span></td><td><span class="badge b-green">Confirmé</span></td></tr>
+              <tr><td><strong>James Okonkwo</strong></td><td>🏓 Padel</td><td>Court P3</td><td>16 juin · 20h–21h</td><td><span class="badge b-navy">Facebook</span></td><td><span class="badge b-green">Confirmé</span></td></tr>
+              <tr><td><strong>Rokhaya Gaye</strong></td><td>🎾 Tennis</td><td>Court 7</td><td>17 juin · 19h–20h</td><td><span class="badge b-navy">Facebook</span></td><td><span class="badge b-orange">En attente</span></td></tr>
+              <tr><td><strong>Cheikh Ndiaye</strong></td><td>🎾 Tennis</td><td>Court 2</td><td>18 juin · 07h–08h</td><td><span class="badge b-green">WhatsApp</span></td><td><span class="badge b-green">Confirmé</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: Piscine -->
+    <div class="page" id="p-piscine">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">🏊</div><span class="kpi-badge up">+18% ↑</span></div><div class="kpi-val">268</div><div class="kpi-lbl">Demandes piscine (juin)</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:55%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-n">💬</div><span class="kpi-badge flat">Top 2</span></div><div class="kpi-val">24%</div><div class="kpi-lbl">Des demandes totales</div><div class="kpi-bar"><div class="kpi-fill f-n" style="width:24%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">🎫</div><span class="kpi-badge up">+9% ↑</span></div><div class="kpi-val">47</div><div class="kpi-lbl">Infos abonnements demandées</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:40%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">✅</div><span class="kpi-badge flat">97%</span></div><div class="kpi-val">97%</div><div class="kpi-lbl">Taux de réponse automatique</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:97%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Demandes piscine · Ce mois</div><div class="card-sub">Tarifs, horaires, cours natation, aqua gym, aqua bike</div></div>
+        <div class="feed">
+          <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Aïssatou Fall</strong> — Tarifs abonnement 6 mois → 135 000F membre / 180 000F non-membre envoyé</div><div class="fi-time">WhatsApp · 09:35</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+          <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Mariama Baldé</strong> — Planning aqua gym + tarifs 10 séances (20 000F membre)</div><div class="fi-time">WhatsApp · 09:10</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+          <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>Rokhaya Gaye</strong> — Inscription cours natation enfant septembre · Carnet 26 000F</div><div class="fi-time">Facebook · 08:42</div></div><div class="fi-right"><span class="badge b-navy">En attente</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: Fitness -->
+    <div class="page" id="p-fitness">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">💪</div><span class="kpi-badge up">+12% ↑</span></div><div class="kpi-val">201</div><div class="kpi-lbl">Demandes fitness (juin)</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:45%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">🕐</div><span class="kpi-badge flat">6 jours/7</span></div><div class="kpi-val">8h–22h</div><div class="kpi-lbl">Horaires communiqués</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:80%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-n">💶</div><span class="kpi-badge flat">Tarif</span></div><div class="kpi-val">40 000F</div><div class="kpi-lbl">Abonnement mensuel communiqué</div><div class="kpi-bar"><div class="kpi-fill f-n" style="width:50%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">✅</div><span class="kpi-badge flat">99%</span></div><div class="kpi-val">99%</div><div class="kpi-lbl">Taux de réponse automatique</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:99%"></div></div></div>
+      </div>
+      <div class="card"><div class="card-hdr"><div class="card-title">Demandes Fitness · Ce mois</div></div><div class="feed">
+        <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Pape Mbaye</strong> — "Tarifs abonnement fitness ?" → Inscription 25 000F + mensuel 40 000F envoyé</div><div class="fi-time">WhatsApp · 10:12</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+        <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>Awa Traoré</strong> — Horaires salle + cours collectifs</div><div class="fi-time">Facebook · 09:55</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+      </div></div>
+    </div>
+
+    <!-- PAGE: Basketball -->
+    <div class="page" id="p-basket">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">🏀</div><span class="kpi-badge up">+8% ↑</span></div><div class="kpi-val">89</div><div class="kpi-lbl">Demandes basketball (juin)</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:20%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">✅</div><span class="kpi-badge flat">94%</span></div><div class="kpi-val">94%</div><div class="kpi-lbl">Taux réponse automatique</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:94%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">📋</div><span class="kpi-badge flat">Note</span></div><div class="kpi-val">6%</div><div class="kpi-lbl">Escalades (hors scope Phase 1)</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:6%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-n">🗓</div><span class="kpi-badge flat">Info</span></div><div class="kpi-val">—</div><div class="kpi-lbl">Réservation non gérée (Phase 2)</div><div class="kpi-bar"><div class="kpi-fill f-n" style="width:0%"></div></div></div>
+      </div>
+      <div class="card"><div class="card-hdr"><div class="card-title">Demandes Basketball · Ce mois</div><div class="card-sub">Infos communiquées — réservation terrain Phase 2</div></div><div class="feed">
+        <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>Ibrahima Diallo</strong> — Planning entrainements adultes + contact coach</div><div class="fi-time">Facebook · 08:55</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+        <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Seydina Mbaye</strong> — Inscriptions saison 2026–2027 · escalade vers équipe</div><div class="fi-time">WhatsApp · 08:10</div></div><div class="fi-right"><span class="badge b-orange">Agent</span></div></div>
+      </div></div>
+    </div>
+
+    <!-- PAGE: Arts martiaux -->
+    <div class="page" id="p-artsmartiaux">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-n">🥋</div><span class="kpi-badge up">+15% ↑</span></div><div class="kpi-val">134</div><div class="kpi-lbl">Demandes arts martiaux (juin)</div><div class="kpi-bar"><div class="kpi-fill f-n" style="width:30%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">✅</div><span class="kpi-badge flat">96%</span></div><div class="kpi-val">96%</div><div class="kpi-lbl">Taux réponse automatique</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:96%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">🏅</div><span class="kpi-badge flat">8</span></div><div class="kpi-val">8</div><div class="kpi-lbl">Disciplines couvertes</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:80%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">💶</div><span class="kpi-badge flat">Tarif</span></div><div class="kpi-val">15 000F</div><div class="kpi-lbl">Mensuel communiqué</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:40%"></div></div></div>
+      </div>
+      <div class="card"><div class="card-hdr"><div class="card-title">Demandes Arts martiaux · Ce mois</div><div class="card-sub">Judo, Karaté, Kung-Fu, Aïkido, Taekwondo, Viet Vo Dao, Kick-Boxing, Jiu-Jitsu</div></div><div class="feed">
+        <div class="fi"><div class="fi-ico fi-wa">📱</div><div class="fi-body"><div class="fi-text"><strong>Pape Seck</strong> — "Cours de judo enfants ?" → Pré-judo 3–5 ans + horaires envoyés · Inscription 20 000F</div><div class="fi-time">WhatsApp · 08:42</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+        <div class="fi"><div class="fi-ico fi-fb">🔵</div><div class="fi-body"><div class="fi-text"><strong>Lamine Faye</strong> — Taekwondo adultes · planning + tarifs</div><div class="fi-time">Facebook · 11:20</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div></div>
+      </div></div>
+    </div>
+
+    <!-- PAGE: Config -->
+    <div class="page" id="p-config">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-g">🤖</div><span class="kpi-badge flat">Actif</span></div><div class="kpi-val">2</div><div class="kpi-lbl">Canaux connectés</div><div class="kpi-bar"><div class="kpi-fill f-g" style="width:100%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-n">🗣</div><span class="kpi-badge flat">Auto</span></div><div class="kpi-val">FR+EN</div><div class="kpi-lbl">Langues actives</div><div class="kpi-bar"><div class="kpi-fill f-n" style="width:100%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-o">📚</div><span class="kpi-badge flat">6</span></div><div class="kpi-val">6</div><div class="kpi-lbl">Activités couvertes</div><div class="kpi-bar"><div class="kpi-fill f-o" style="width:100%"></div></div></div>
+        <div class="kpi"><div class="kpi-top"><div class="kpi-ico ico-t">🔗</div><span class="kpi-badge b-orange" style="border-radius:999px;padding:2px 8px">En cours</span></div><div class="kpi-val">BJ</div><div class="kpi-lbl">Intégration Balle Jaune</div><div class="kpi-bar"><div class="kpi-fill f-t" style="width:40%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">État du système · Olympique Club Bot</div></div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Module</th><th>Statut</th><th>Détail</th></tr></thead>
+            <tbody>
+              <tr><td><strong>WhatsApp Business API</strong></td><td><span class="badge b-green">● Actif</span></td><td style="color:var(--text-2)">+221 78 189 61 26 · Réponse &lt;3s</td></tr>
+              <tr><td><strong>Facebook Messenger</strong></td><td><span class="badge b-green">● Actif</span></td><td style="color:var(--text-2)">Page @OlympiqueClub · Réponse &lt;5s</td></tr>
+              <tr><td><strong>Détection langue FR/EN</strong></td><td><span class="badge b-green">● Actif</span></td><td style="color:var(--text-2)">Automatique · Aucune config requise</td></tr>
+              <tr><td><strong>Base de connaissances</strong></td><td><span class="badge b-green">● Actif</span></td><td style="color:var(--text-2)">Tennis, padel, piscine, fitness, basket, arts martiaux, escalade</td></tr>
+              <tr><td><strong>Réservation tennis/padel</strong></td><td><span class="badge b-green">● Actif</span></td><td style="color:var(--text-2)">Vérification dispos + confirmation automatique</td></tr>
+              <tr><td><strong>Intégration Balle Jaune</strong></td><td><span class="badge b-orange">⏳ En cours</span></td><td style="color:var(--text-2)">Synchro Google Calendar · Booking automatique en développement</td></tr>
+              <tr><td><strong>Escalade agent humain</strong></td><td><span class="badge b-green">● Actif</span></td><td style="color:var(--text-2)">Transfert avec contexte complet · 2% des conversations</td></tr>
+              <tr><td><strong>Rappels réservation</strong></td><td><span class="badge b-gray">Phase 2</span></td><td style="color:var(--text-2)">WhatsApp 2h avant · À implémenter</td></tr>
+              <tr><td><strong>Paiement en ligne</strong></td><td><span class="badge b-gray">Phase 2</span></td><td style="color:var(--text-2)">Intégration Wave / Orange Money</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<div class="toast-wrap" id="tw"></div>
+
+<script>
+/* ── CONVERSATIONS DATA ─────────────────────── */
+const CONVS = [
+  {
+    name:'Moussa Diaw', initials:'MD', channel:'WhatsApp', topic:'🎾 Tennis', date:'16 juin 2026',
+    status:'Résolu', statusCls:'b-green',
+    msgs:[
+      {role:'u', text:'Bonjour, je voudrais réserver un terrain de tennis pour demain soir si possible.', time:'09:44'},
+      {role:'b', text:'Bonjour Moussa ! Bien sûr, les courts de tennis sont disponibles de 7h à minuit tous les jours.\n\nPour demain soir, quels créneaux vous conviendrait ? (18h, 19h ou 20h ?)', time:'09:44'},
+      {role:'u', text:'18h ce serait parfait. C\'est pour 2 personnes.', time:'09:45'},
+      {role:'b', text:'Parfait ! Le Court 4 est disponible demain 16 juin de 18h à 19h.\n\n✅ Réservation confirmée :\n• Court 4 — 16 juin · 18h–19h\n• 2 joueurs\n\nMerci de vous présenter au bureau tennis avec votre badge. Rappel : arrivée obligatoire dans les 15 minutes ou la réservation est annulée. Bonne partie ! 🎾', time:'09:45'},
+      {role:'u', text:'Merci beaucoup !', time:'09:48'},
+    ]
+  },
+  {
+    name:'Aïssatou Fall', initials:'AF', channel:'Facebook', topic:'🏊 Piscine', date:'16 juin 2026',
+    status:'Résolu', statusCls:'b-green',
+    msgs:[
+      {role:'u', text:'Bonjour ! Quel est le tarif pour un abonnement piscine de 6 mois ?', time:'09:33'},
+      {role:'b', text:'Bonjour Aïssatou ! Voici les tarifs pour l\'abonnement piscine 6 mois :\n\n• Membre : 135 000 F\n• Non-membre : 180 000 F\n• Enfant (-16 ans) : 85 000 F\n\nL\'abonnement donne accès aux bassins extérieur (25m), intérieur (20m) et bassin enfants.', time:'09:33'},
+      {role:'u', text:'Et pour l\'abonnement 1 an, c\'est combien pour un non-membre ?', time:'09:34'},
+      {role:'b', text:'Pour 1 an en tant que non-membre, l\'abonnement piscine est à 235 000 F.\n\nPour souscrire, passez directement à l\'accueil de la piscine ou appelez le 33 864 56 55. 😊', time:'09:34'},
+      {role:'u', text:'Super merci pour l\'info !', time:'09:35'},
+    ]
+  },
+  {
+    name:'James Okonkwo', initials:'JO', channel:'Facebook', topic:'🏓 Padel', date:'16 juin 2026',
+    status:'Résolu', statusCls:'b-green',
+    msgs:[
+      {role:'u', text:'Hi! I\'d like to book a padel court for tomorrow evening around 8pm.', time:'09:18'},
+      {role:'b', text:'Hello James! Our padel courts are open every day from 7:45am to midnight.\n\nCourt P2 and P3 are available tomorrow evening. Would 20:00–21:00 work for you?', time:'09:18'},
+      {role:'u', text:'P2 at 8pm sounds great! We\'ll be 4 players.', time:'09:20'},
+      {role:'b', text:'Perfect! Here\'s your booking confirmation:\n\n✅ Court P2 — June 17 · 20:00–21:00\n• 4 players\n\nTo finalize: download the Balle Jaune app and message 77 634 37 18 to validate your account. See you on court! 🏓', time:'09:21'},
+    ]
+  },
+  {
+    name:'Mariama Baldé', initials:'MB', channel:'WhatsApp', topic:'🏊 Piscine', date:'16 juin 2026',
+    status:'Résolu', statusCls:'b-green',
+    msgs:[
+      {role:'u', text:'Bonjour, c\'est quoi les horaires de l\'aqua gym svp ?', time:'09:07'},
+      {role:'b', text:'Bonjour Mariama ! Voici le planning Aqua Gym :\n\n🗓 Lun / Mar / Mer / Jeu / Ven / Sam : 9h00\n🗓 Lun / Mer / Ven : 18h00\n🗓 Samedi : 10h00', time:'09:07'},
+      {role:'u', text:'Et les tarifs ?', time:'09:08'},
+      {role:'b', text:'Tarifs Aqua Gym :\n\n• La séance : 3 000 F\n• Carnet 10 séances (membre) : 20 000 F\n• Carnet 10 séances (non-membre) : 25 000 F\n\nVoulez-vous vous inscrire ? Passez à l\'accueil de la piscine 😊', time:'09:08'},
+      {role:'u', text:'Oui je vais passer ce weekend, merci !', time:'09:10'},
+      {role:'b', text:'Parfait ! La piscine est ouverte le samedi de 8h à 18h. À bientôt ! 🏊', time:'09:10'},
+    ]
+  },
+  {
+    name:'Pape Seck', initials:'PS', channel:'WhatsApp', topic:'🥋 Arts martiaux', date:'16 juin 2026',
+    status:'Résolu', statusCls:'b-green',
+    msgs:[
+      {role:'u', text:'Bonjour, c\'est quand les cours de judo pour les enfants svp ?', time:'08:40'},
+      {role:'b', text:'Bonjour ! Voici les cours de Judo pour enfants à l\'Olympique Club :\n\n👶 Pré-judo (3–5 ans) : horaires sur demande à l\'accueil\n🥋 Judo enfants (6 ans+) : tous les jours, salle arts martiaux ouverte 8h–23h\n\nTarifs :\n• Inscription : 20 000 F\n• Mensuel : 15 000 F', time:'08:40'},
+      {role:'u', text:'Ok super. Mon fils a 5 ans, il peut commencer ?', time:'08:41'},
+      {role:'b', text:'Oui, dès 3 ans c\'est possible avec le Pré-judo ! 😊\n\nPour l\'inscription et connaître les créneaux exacts pour son âge, je vous conseille de contacter directement l\'accueil :\n📞 33 864 56 55\n\nIls pourront vous orienter vers le bon groupe.', time:'08:41'},
+      {role:'u', text:'Parfait merci beaucoup !', time:'08:42'},
+    ]
+  },
+  {
+    name:'Amadou Mbaye', initials:'AM', channel:'WhatsApp', topic:'🎾 Tennis', date:'16 juin 2026',
+    status:'Escalade agent', statusCls:'b-orange',
+    msgs:[
+      {role:'u', text:'Bonjour, je souhaite m\'inscrire à un tournoi de tennis. Est-ce que vous avez des compétitions prochainement ?', time:'08:27'},
+      {role:'b', text:'Bonjour Amadou ! Oui, l\'Olympique Club organise des tournois annuels internes selon le classement et l\'âge, en lien avec la Fédération Sénégalaise de Tennis.\n\nPour les dates des prochaines compétitions et les modalités d\'inscription, je vais vous mettre en relation avec l\'équipe tennis. Pouvez-vous me préciser votre niveau de jeu ?', time:'08:28'},
+      {role:'u', text:'Je joue depuis 3 ans, niveau intermédiaire. J\'ai pas de classement officiel.', time:'08:29'},
+      {role:'sys', text:'⬆ Conversation transférée à l\'agent humain · Bureau tennis'},
+      {role:'b', text:'Parfait ! Un responsable du bureau tennis va vous contacter dans les plus brefs délais pour les modalités d\'inscription au prochain tournoi. En attendant, n\'hésitez pas à passer directement au bureau tennis avec votre badge membre. 🎾', time:'08:30'},
+    ]
+  },
+  {
+    name:'Khadija Ba', initials:'KB', channel:'WhatsApp', topic:'🏊 Piscine', date:'16 juin 2026',
+    status:'Résolu', statusCls:'b-green',
+    msgs:[
+      {role:'u', text:'Bonjour, les tarifs aqua bike + le planning svp', time:'08:12'},
+      {role:'b', text:'Bonjour Khadija ! Voici tout sur l\'Aqua Bike :\n\n💰 Tarifs :\n• La séance : 5 000 F\n• Carnet 10 séances : 45 000 F\n\n🗓 Planning :\n• Lun : 8h00 / 18h30\n• Mar : 8h00 / 19h00\n• Mer : 8h00 / 12h30\n• Jeu : 8h00\n• Ven : 8h00 / 19h00\n• Sam : 8h00 / 11h00 / 12h00\n\nPour les carnets, passez à l\'accueil 😊', time:'08:13'},
+      {role:'u', text:'Merci ! Le samedi à 11h c\'est disponible maintenant ?', time:'08:14'},
+      {role:'b', text:'Les cours du samedi matin ont généralement des places disponibles ! Pour confirmer, appelez le 33 864 56 55 ou passez directement à la piscine. 🏊', time:'08:15'},
+    ]
+  },
+  {
+    name:'Ibrahima Diallo', initials:'ID', channel:'Facebook', topic:'🏀 Basket', date:'16 juin 2026',
+    status:'Résolu', statusCls:'b-green',
+    msgs:[
+      {role:'u', text:'Bonjour, je cherche le planning des entraînements basketball adultes svp', time:'07:52'},
+      {role:'b', text:'Bonjour Ibrahima ! Pour le basketball adultes à l\'Olympique Club :\n\n🏀 Les terrains sont disponibles de 7h à 1h du matin, tous les jours.\n\n💰 Tarifs terrain :\n• Journée : 10 000 F / heure\n• Nuit : 16 000 F / heure\n\nLes terrains se trouvent au niveau du parking du club.', time:'07:53'},
+      {role:'u', text:'Et pour les cours, il y a un coach ?', time:'07:53'},
+      {role:'b', text:'Pour les cours avec encadrement, je vous recommande de contacter directement l\'accueil au 33 864 56 55 — l\'équipe pourra vous orienter vers le bon interlocuteur pour les entraînements adultes. 😊', time:'07:54'},
+      {role:'u', text:'Ok merci bien !', time:'07:55'},
+    ]
+  }
+];
+
+function openConv(el, idx) {
+  document.querySelectorAll('.conv-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  const c = CONVS[idx];
+  document.getElementById('ct-av').textContent   = c.initials;
+  document.getElementById('ct-name').textContent = c.name;
+  document.getElementById('ct-meta').textContent = `${c.channel} · ${c.topic} · ${c.date}`;
+  const st = document.getElementById('ct-status');
+  st.textContent = c.status; st.className = 'badge ' + c.statusCls;
+
+  const box = document.getElementById('ct-msgs');
+  box.innerHTML = '';
+  c.msgs.forEach(m => {
+    const d = document.createElement('div');
+    if (m.role === 'sys') {
+      d.className = 'msg msg-sys';
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div>`;
+    } else if (m.role === 'u') {
+      d.className = 'msg msg-u';
+      d.innerHTML = `<div class="msg-bubble">${m.text.replace(/\n/g,'<br>')}</div><div class="msg-time">${m.time}</div>`;
+    } else {
+      d.className = 'msg msg-b';
+      d.innerHTML = `<div class="msg-bot-name">🤖 Bot Olympique Club</div><div class="msg-bubble">${m.text.replace(/\n/g,'<br>')}</div><div class="msg-time">${m.time}</div>`;
+    }
+    box.appendChild(d);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+window.addEventListener('load', () => {
+  const first = document.querySelector('.conv-item');
+  if (first) openConv(first, 0);
+});
+
+/* KPI counters */
+function cnt(id,end,suf,delay){
+  const el=document.getElementById(id); if(!el)return;
+  setTimeout(()=>{
+    const dur=900,s=performance.now();
+    function f(n){const p=Math.min((n-s)/dur,1),e=1-Math.pow(1-p,3);el.textContent=Math.round(end*e)+suf;if(p<1)requestAnimationFrame(f);}
+    requestAnimationFrame(f);
+  },delay);
+}
+window.addEventListener('load',()=>{cnt('kv1',1086,'',200);cnt('kv2',143,'',350);cnt('kv3',2,'s',500);cnt('kv4',94,'%',650);});
+
+/* Navigation */
+const pages = {
+  overview:'p-overview', conversations:'p-conversations',
+  whatsapp:'p-whatsapp', facebook:'p-facebook',
+  tennis:'p-tennis', piscine:'p-piscine', fitness:'p-fitness',
+  basket:'p-basket', artsmartiaux:'p-artsmartiaux', config:'p-config'
+};
+function nav(el, key) {
+  document.querySelectorAll('.sb-nav li a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const p=document.getElementById(pages[key]||'p-overview');
+  if(p) p.classList.add('active');
+  const titles={overview:'Vue générale',conversations:'Conversations',whatsapp:'WhatsApp',facebook:'Facebook Messenger',tennis:'Tennis & Padel',piscine:'Piscine',fitness:'Fitness',basket:'Basketball',artsmartiaux:'Arts martiaux',config:'Configuration'};
+  document.querySelector('.tb-title').textContent=titles[key]||'';
+}
+
+/* Simulate message */
+function simMsg() {
+  const pool=[
+    {from:'Awa Traoré',ch:'WhatsApp',msg:'Horaires piscine demandés → Planning complet envoyé'},
+    {from:'David K.',ch:'Facebook',msg:'Infos padel débutants → Coachs + tarifs envoyés'},
+    {from:'Khadija Ba',ch:'WhatsApp',msg:'Tarifs aqua bike → 5 000F/séance · 45 000F/10 séances'},
+    {from:'Lamine Sy',ch:'Facebook',msg:'Cours judo enfants → Horaires + inscription 20 000F'},
+  ];
+  const m=pool[Math.floor(Math.random()*pool.length)];
+  toast(`💬 ${m.from}`,`${m.ch} · ${m.msg}`);
+  const feed=document.getElementById('feed');
+  if(feed){
+    const d=document.createElement('div');
+    d.className='fi';
+    d.innerHTML=`<div class="fi-ico fi-${m.ch==='WhatsApp'?'wa':'fb'}">${m.ch==='WhatsApp'?'📱':'🔵'}</div><div class="fi-body"><div class="fi-text"><strong>${m.from}</strong> — ${m.msg}</div><div class="fi-time">${m.ch} · à l'instant</div></div><div class="fi-right"><span class="badge b-green">Résolu</span></div>`;
+    feed.insertBefore(d,feed.firstChild);
+  }
+}
+
+/* Toast */
+function toast(title,sub){
+  const w=document.getElementById('tw');
+  const el=document.createElement('div'); el.className='toast';
+  el.innerHTML=`<div class="t-body"><div class="t-title">${title}</div>${sub?`<div class="t-sub">${sub}</div>`:''}</div><button class="t-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  w.appendChild(el); setTimeout(()=>el.isConnected&&el.remove(),4500);
+}
+
+/* Init */
+setTimeout(()=>toast('🟢 Bot en ligne','WhatsApp + Facebook · Juin 2026 · 0 message en attente'),1200);
+</script>
+</body>
+</html>
